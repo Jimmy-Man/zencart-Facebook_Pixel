@@ -19,7 +19,6 @@ Zen Cart&reg; v1.5.4
 
 需要修改到的文件如下:
 ```php
-        modified:   includes/configure.php
         modified:   includes/functions/html_output.php
         modified:   includes/modules/product_listing.php
         modified:   includes/templates/template_default/common/html_header.php
@@ -33,16 +32,6 @@ Zen Cart&reg; v1.5.4
         modified:   admin/includes/languages/schinese.php
 ```
 
-- includes/configure.php
-```php
-   define('SQL_CACHE_METHOD', 'none');
-   define('DIR_FS_SQL_CACHE', 'C:/phpStudy/PHPTutorial/WWW/zen-cart-chinese-1.5.4/cache');
--
-+  define('FACEBOOK_PIXEL_CURRENCY','USD'); //在文件末尾添加这一句
- // EOF
-
-```
-注意这个文件的权限。
 - includes/functions/html_output.php
 ```php
      if (zen_not_null($alt)) $image_submit .= ' title=" ' . zen_output_string($alt) . ' "';
@@ -202,5 +191,6 @@ define('BOX_CONFIGURATION_FACEBOOKPixel_SETTINGS', 'FacebookPixel Settings');
 ```
 将这段代码添加至文件中
 
+执行sql文件
 
 结束。
