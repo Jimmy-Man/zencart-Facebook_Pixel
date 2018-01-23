@@ -30,6 +30,8 @@ Zen Cart&reg; v1.5.4
         modified:   includes/templates/template_default/templates/tpl_product_info_display.php
         modified:   admin/includes/languages/english.php
         modified:   admin/includes/languages/schinese.php
+        /includes/functions/functions_prices.php
+        /includes/modules/pages/shopping_cart/header_php.php
 ```
 
 - includes/functions/html_output.php
@@ -104,15 +106,22 @@ Zen Cart&reg; v1.5.4
 ```php
 +<!--facebook pixel start-->
 +<?php
-+    $faceboke_productid_str = implode($faceboke_productid_arr,',');
-+     if($order_totals[2]['code'] == 'ot_total'){
-+         $total_price = preg_replace('/([\x80-\xff]*)/i','',$order_totals[2]['text']);
-+     }
-+?>
++$id = array();
++$id_str = '';
++    foreach ($order->products as $key => $val){
++        $idarr = explode(":",$val['id']);
++        $id[] = $idarr[0];
++    }
++    $id_str = implode(',',$id);
++        $end_arr = end($order_totals);
++        $price = $end_arr['value'];
++        $total_price = $currencies->currencies[FACEBOOK_PIXEL_CURRENCY]['value'] * $price;
++
+ ?>
 +<script>
 +    function   facebook(){
 +        fbq('track', 'Purchase', {
-+            content_ids: [<?php echo $faceboke_productid_str ?>],
++            content_ids: [<?php echo $id_str ?>],
 +            content_type: 'product'
 +            value: <?php echo $total_price ?>,
 +            currency: '<?php echo FACEBOOK_PIXEL_CURRENCY; ?>'
@@ -150,7 +159,7 @@ Zen Cart&reg; v1.5.4
 +<script>
 +    function   facebook(){
 +        fbq('track', 'CompleteRegistration', {
-+            value: <?php $_SESSION['cart']->total ?> ,
++            value: <?php value: <?php echo $_SESSION['USD'] ?> ,
 +            currency: '<?php echo FACEBOOK_PIXEL_CURRENCY; ?>'
 +        });
 +    }
@@ -166,7 +175,7 @@ Zen Cart&reg; v1.5.4
 +    fbq('track', 'ViewContent', {
 +        content_ids: [<?php echo $_GET['products_id']; ?>],
 +        content_type: 'product'
-+        value: <?php echo $result = preg_replace('/([\x80-\xff]*)/i','',zen_get_products_display_price((int)$_GET['products_id'])); ?>,
++        value: <?php echo $result = preg_replace('/([\x80-\xff]*)/i','',zen_get_products_display_price_my((int)$_GET['products_id'])); ?>,
 +        currency: '<?php echo FACEBOOK_PIXEL_CURRENCY; ?>'
 +    });
 +</script>
@@ -175,7 +184,7 @@ Zen Cart&reg; v1.5.4
 +        fbq('track', 'AddToCart', {
 +            content_ids: [<?php echo $_GET['products_id']; ?>],
 +            content_type: 'product'
-+            value: <?php echo $result = preg_replace('/([\x80-\xff]*)/i','',zen_get_products_display_price((int)$_GET['products_id'])); ?>,
++            value: <?php echo $result = preg_replace('/([\x80-\xff]*)/i','',zen_get_products_display_price_my((int)$_GET['products_id'])); ?>,
 +            currency: '<?php echo FACEBOOK_PIXEL_CURRENCY; ?>'
 +        });
 +    }
@@ -184,12 +193,58 @@ Zen Cart&reg; v1.5.4
 ```
 将这段代码添加至文件末尾
 
+
+
 - admin/includes/languages/english.php
 - admin/includes/languages/schinese.php
 ```php
 define('BOX_CONFIGURATION_FACEBOOKPixel_SETTINGS', 'FacebookPixel Settings');
 ```
 将这段代码添加至文件中
+
+- includes/functions/functions_prices.php
+```php
++function zen_get_products_display_price_my($products_id){
++
++    global  $currencies;
++
++    $display_normal_price = zen_get_products_base_price($products_id);
++
++//    error_log(print_r($currencies->currencies['USD']['value'],1)."~~~~a\n",3,'/tmp/log.log');
++
++    $price = $currencies->currencies[FACEBOOK_PIXEL_CURRENCY]['value'] * $display_normal_price;
++
++    return sprintf("%.2f", $price);
++}
+```
+将此方法添加到文件里
+
+
+- includes/modules/pages/shopping_cart/header_php.php
+```php
+ } // end FOR loop
+
+
++
++
++
++$base_price = $_SESSION['cart']->total;
++$rater = $currencies->currencies[FACEBOOK_PIXEL_CURRENCY]['value'];
++
++$final_price = sprintf("%.2f", $base_price * $rater);
++$_SESSION['USD'] = $final_price;
++
++
++
++
++
+ // This should be last line of the script:
+ $zco_notifier->notify('NOTIFY_HEADER_END_SHOPPING_CART');
+ ?>
+```
+将此方法添加到文件里
+
+
 
 执行sql文件
 
